@@ -1,86 +1,135 @@
-// Данный файл - лишь собрание подключений готовых компонентов.
-// Рекомендуется создавать отдельный файл в папке components и подключать все там
+"use strict"
 
-// Определение операционной системы на мобильных
-import { mobileCheck } from "./functions/mobile-check";
-console.log(mobileCheck())
+let variables = {
+  textCounter: 0,
+  homeSpecialty: "Frontend developer",
+  homeSpecialtySelector: '.home__specialty',
+  body: 'body'
+}
 
-// Определение ширины экрана
-// import { isMobile, isTablet, isDesktop } from './functions/check-viewport';
-// if (isDesktop()) {
-//   console.log('...')
-// }
+let homeSpecialtySelector = document.querySelector(variables.homeSpecialtySelector),
+    body = document.querySelector(variables.body);
 
-// Троттлинг функции (для ресайза, ввода в инпут, скролла и т.д.)
-// import { throttle } from './functions/throttle';
-// let yourFunc = () => { console.log('throttle') };
-// let func = throttle(yourFunc);
-// window.addEventListener('resize', func);
+function textTyping() {
+  if (variables.textCounter < variables.homeSpecialty.length) {
+    homeSpecialtySelector.innerHTML += variables.homeSpecialty.charAt(variables.textCounter)
 
-// Фикс фулскрин-блоков
-// import './functions/fix-fullheight';
+    variables.textCounter++;
+    setTimeout(textTyping, 150);
+  }
+}
 
-// Реализация бургер-меню
-// import { burger } from './functions/burger';
 
-// Реализация остановки скролла (не забудьте вызвать функцию)
-// import { disableScroll } from './functions/disable-scroll';
+function canvas(){
+  let canvas = document.createElement('canvas'),
+      ctx = canvas.getContext('2d'),
+      w = canvas.width = innerWidth,
+      h = canvas.height = innerHeight,
+      particles = [],
+      properties = {
+        bgColor: 'rgba(0, 0, 0, 0.6)',
+        particleColor: 'rgb(255, 200, 61, 1)',
+        particleRadius: 3,
+        particleCount: 100,
+        particleMaxVelocity: .3,
+        lineLength: 150,
+        particleLife: 6
+      };
 
-// Реализация включения скролла (не забудьте вызвать функцию)
-// import { enableScroll } from './functions/enable-scroll';
+  body.appendChild(canvas);
 
-// Реализация модального окна
-// import GraphModal from 'graph-modal';
-// const modal = new GraphModal();
+  window.onresize = function (){
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+  }
 
-// Реализация табов
-// import GraphTabs from 'graph-tabs';
-// const tabs = new GraphTabs('tab');
+  class Particle {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.velocityX = Math.random()*(properties.particleMaxVelocity*2)-properties.particleMaxVelocity;
+      this.velocityY = Math.random()*(properties.particleMaxVelocity*2)-properties.particleMaxVelocity;
+      this.life = Math.random()*properties.particleLife * 60;
+    }
+    position() {
+      this.x + this.velocityX > w && this.velocityX > 0 || this.x + this.velocityX < 0 && this.velocityX < 0? this.velocityX *=-1 : this.velocityX;
+      this.y + this.velocityY > h && this.velocityY > 0 || this.y + this.velocityY < 0 && this.velocityY < 0? this.velocityY *=-1 : this.velocityY;
+      this.x += this.velocityX;
+      this.y += this.velocityY;
+    }
+    reDraw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, properties.particleRadius, 0, Math.PI*2);
+      ctx.closePath();
+      ctx.fillStyle = properties.particleColor;
+      ctx.fill();
+    }
+    reCalculateLife() {
+      if (this.life < 1){
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.velocityX = Math.random()*(properties.particleMaxVelocity*2)-properties.particleMaxVelocity;
+        this.velocityY = Math.random()*(properties.particleMaxVelocity*2)-properties.particleMaxVelocity;
+        this.life = Math.random()*properties.particleLife * 60;
+      }
+      this.life--;
+    }
+  }
 
-// Получение высоты шапки сайта (не забудьте вызвать функцию)
-// import { getHeaderHeight } from './functions/header-height';
+  function reDrawBackground() {
+    ctx.fillStyle = properties.bgColor;
+    ctx.fillRect(0, 0, w, h);
+  }
 
-// Подключение плагина кастом-скролла
-// import 'simplebar';
+  function drawLines() {
+    let x1, y1, x2, y2, length, opacity;
 
-// Подключение плагина для позиционирования тултипов
-// import { createPopper, right} from '@popperjs/core';
-// createPopper(el, tooltip, {
-//   placement: 'right'
-// });
+    for (let i in particles) {
+      for (let j in particles) {
+        x1 = particles[i].x;
+        y1 = particles[i].y;
+        x2 = particles[j].x;
+        y2 = particles[j].y;
+        length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
-// Подключение свайпера
-// import Swiper, { Navigation, Pagination } from 'swiper';
-// Swiper.use([Navigation, Pagination]);
-// const swiper = new Swiper(el, {
-//   slidesPerView: 'auto',
-// });
+        if (length < properties.lineLength){
+          opacity = 1-length/properties.lineLength;
+          ctx.lineWidth = 0.5;
+          ctx.strokeStyle = "rgba(255, 200, 61, "+opacity+")";
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+    }
+  }
 
-// Подключение анимаций по скроллу
-// import AOS from 'aos';
-// AOS.init();
+  function reDrawParticles(){
+    for (let i in particles){
+      particles[i].reCalculateLife();
+      particles[i].position();
+      particles[i].reDraw();
+    }
+  }
 
-// Подключение параллакса блоков при скролле
-// import Rellax from 'rellax';
-// const rellax = new Rellax('.rellax');
+  function loop() {
+    reDrawBackground();
+    reDrawParticles();
+    drawLines();
+    requestAnimationFrame(loop);
+  }
 
-// Подключение плавной прокрутки к якорям
-// import SmoothScroll from 'smooth-scroll';
-// const scroll = new SmoothScroll('a[href*="#"]');
+  function init() {
+    for (let i = 0; i < properties.particleCount; i++) {
+      particles.push(new Particle);
+    }
 
-// Подключение событий свайпа на мобильных
-// import 'swiped-events';
-// document.addEventListener('swiped', function(e) {
-//   console.log(e.target);
-//   console.log(e.detail);
-//   console.log(e.detail.dir);
-// });
+    loop();
+  }
+  init();
+}
 
-// import { validateForms } from './functions/validate-forms';
-// const rules1 = [...];
-
-// const afterForm = () => {
-//   console.log('Произошла отправка, тут можно писать любые действия');
-// };
-
-// validateForms('.form-1', rules1, afterForm);
+canvas();
+textTyping();
