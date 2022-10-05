@@ -4,11 +4,15 @@ let variables = {
   textCounter: 0,
   homeSpecialty: "Frontend developer",
   homeSpecialtySelector: '.home__specialty',
-  body: 'body'
+  body: 'body',
+  btnNav: '.btn-nav',
+  nav: '.nav'
 }
 
 let homeSpecialtySelector = document.querySelector(variables.homeSpecialtySelector),
-    body = document.querySelector(variables.body);
+    body = document.querySelector(variables.body),
+    btnNav = document.querySelector(variables.btnNav),
+    nav = document.querySelector(variables.nav);
 
 function textTyping() {
   if (variables.textCounter < variables.homeSpecialty.length) {
@@ -18,7 +22,6 @@ function textTyping() {
     setTimeout(textTyping, 150);
   }
 }
-
 
 function canvas(){
   let canvas = document.createElement('canvas'),
@@ -130,6 +133,13 @@ function canvas(){
   }
   init();
 }
+
+function navToggle() {
+  nav.classList.toggle('active');
+  btnNav.classList.toggle('active');
+}
+
+btnNav.addEventListener('click', navToggle);
 
 canvas();
 textTyping();
